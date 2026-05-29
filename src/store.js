@@ -281,7 +281,9 @@ export const useStore = create((set, get) => {
         }
         return addElToCurrent(s, el)
       }),
-    addIcon: (icon) =>
+    // icon: guarda também o path SVG (pra ícones da biblioteca MDI que não estão
+    // no registro local); os curados podem passar só o nome (fallback resolve).
+    addIcon: (icon, path = null) =>
       update((s) => {
         const { w, h } = getStageSize(s.format)
         const d = w * 0.22
@@ -289,6 +291,7 @@ export const useStore = create((set, get) => {
           id: nanoid(),
           type: 'icon',
           icon,
+          path,
           x: w * 0.4,
           y: h * 0.4,
           width: d,

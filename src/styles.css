@@ -371,6 +371,43 @@ body {
 }
 .emoji-cell:hover { border-color: var(--brand); }
 
+/* ---------- Modal (biblioteca de ícones) ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  padding: 20px;
+}
+.modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.modal-head h3 { margin: 0; font-size: 15px; }
+.modal-head small { color: var(--muted); font-weight: 400; }
+.icon-grid.lib {
+  grid-template-columns: repeat(8, 1fr);
+  overflow-y: auto;
+  margin: 10px 0;
+  flex: 1;
+}
+
 /* ---------- Cores da marca ---------- */
 .brand-row {
   display: flex;

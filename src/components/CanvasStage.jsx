@@ -243,7 +243,7 @@ export default function CanvasStage() {
       return (
         <Group {...groupProps}>
           <Path
-            data={ICONS[el.icon] || ICONS.estrela}
+            data={el.path || ICONS[el.icon] || ICONS.estrela}
             fill={el.fill}
             scaleX={el.width / ICON_VIEWBOX}
             scaleY={el.height / ICON_VIEWBOX}

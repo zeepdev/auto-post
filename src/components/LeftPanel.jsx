@@ -6,6 +6,7 @@ import { TEMPLATES } from '../lib/templates.js'
 import { ICONS, ICON_LIST } from '../lib/icons.js'
 import { EMOJIS } from '../lib/emojis.js'
 import ContextPanel from './ContextPanel.jsx'
+import IconLibrary from './IconLibrary.jsx'
 
 export default function LeftPanel() {
   const [tab, setTab] = useState('design')
@@ -374,6 +375,7 @@ function ElementsSection() {
   const addRect = useStore((s) => s.addRect)
   const addIcon = useStore((s) => s.addIcon)
   const addEmoji = useStore((s) => s.addEmoji)
+  const [lib, setLib] = useState(false)
 
   return (
     <Section title="Elementos">
@@ -388,7 +390,7 @@ function ElementsSection() {
           <button
             key={name}
             className="icon-cell"
-            onClick={() => addIcon(name)}
+            onClick={() => addIcon(name, ICONS[name])}
             title={name}
           >
             <svg viewBox="0 0 24 24" width="20" height="20">
@@ -397,6 +399,9 @@ function ElementsSection() {
           </button>
         ))}
       </div>
+      <button className="btn block" onClick={() => setLib(true)} style={{ marginTop: 8 }}>
+        🔍 Mais ícones (biblioteca)
+      </button>
       <div className="sub">Emojis</div>
       <div className="emoji-grid">
         {EMOJIS.map((e) => (
@@ -405,6 +410,9 @@ function ElementsSection() {
           </button>
         ))}
       </div>
+      {lib && (
+        <IconLibrary onPick={(name, path) => addIcon(name, path)} onClose={() => setLib(false)} />
+      )}
     </Section>
   )
 }

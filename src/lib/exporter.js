@@ -81,7 +81,7 @@ async function renderSlideToDataURL(slide, format, mime, quality) {
       const g = new Konva.Group({ x: el.x, y: el.y, rotation: el.rotation || 0, opacity: el.opacity ?? 1 })
       g.add(
         new Konva.Path({
-          data: ICONS[el.icon] || ICONS.estrela,
+          data: el.path || ICONS[el.icon] || ICONS.estrela,
           fill: el.fill,
           scaleX: el.width / ICON_VIEWBOX,
           scaleY: el.height / ICON_VIEWBOX,

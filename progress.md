@@ -81,3 +81,8 @@
 - **IA sempre enriquece**: prompt do `anthropic.js` agora exige decorations em todo slide (1 grande esmaecida de fundo + 1–3 detalhes nos cantos), combinando com a identity.
 - **Arquivo .atp** (`lib/projectFile.js`): `saveProject` baixa JSON `{app,version,format,slides}` como `nome.atp`; `readProjectFile` valida e abre. Store `loadProject`. Botões 💾 Salvar / 📂 Abrir no Header. Resposta sobre bancos de ícones da web: MDI/@mdi/js, Lucide, Bootstrap Icons (anotado p/ futura integração se quiser milhares).
 - Build OK (251 módulos).
+
+### 2026-05-29 (cont. 8) — Biblioteca de ícones MDI (~7.400) sob demanda
+- Dep `@mdi/js`. `components/IconLibrary.jsx`: modal com busca; faz `import('@mdi/js')` dinâmico → Vite gera chunk separado (`mdi-*.js`, ~803KB gzip) que só carrega ao abrir o buscador. Bundle principal segue leve (~154KB gzip).
+- Elemento `icon` agora guarda `path` (SVG). Renderer/exporter usam `el.path || ICONS[el.icon]`. Ícones MDI são autossuficientes (salvos no .atp). AI continua usando nomes curados (fallback resolve). `addIcon(name, path)`.
+- Botão "🔍 Mais ícones (biblioteca)" na seção Elementos; resultados limitados a 300 por busca. Build OK (254 módulos + chunk mdi).

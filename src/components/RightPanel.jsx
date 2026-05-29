@@ -120,7 +120,7 @@ export default function RightPanel() {
                     <button
                       key={name}
                       className={`icon-cell ${el.icon === name ? 'on' : ''}`}
-                      onClick={() => updateElement(el.id, { icon: name })}
+                      onClick={() => updateElement(el.id, { icon: name, path: ICONS[name] })}
                       title={name}
                     >
                       <svg viewBox="0 0 24 24" width="20" height="20">
