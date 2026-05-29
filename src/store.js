@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { getStageSize } from './lib/stage.js'
 import { luminance, readableTextColor } from './lib/colors.js'
+import { recolorSlides } from './lib/recolor.js'
 import { getToken, getUsername, saveSession, clearSession } from './lib/api.js'
 
 // Deriva uma identidade visual {background, textColor, accent} a partir de uma paleta.
@@ -373,6 +374,17 @@ export const useStore = create((set, get) => {
         const brandColors = s.brandColors.filter((_, idx) => idx !== i)
         saveJSON(BRAND_KEY, brandColors)
         return { brandColors }
+      }),
+    // Repinta TODAS as artes seguindo as cores da marca (ou uma paleta passada).
+    applyPaletteToAll: (paletteIn) =>
+      update((s) => {
+        const palette = paletteIn && paletteIn.length ? paletteIn : s.brandColors
+        if (!palette || palette.length === 0) return {}
+        return {
+          slides: recolorSlides(s.slides, palette),
+          identity: buildIdentity(palette),
+          selectedId: null,
+        }
       }),
 
     // ---- templates ----

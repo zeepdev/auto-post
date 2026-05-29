@@ -69,3 +69,8 @@
 - **Cor dos elementos** confirmada no inspector pra rect/circle/triangle/icon (e troca de ícone). 
 - **Validação:** `npm run build` OK (248 módulos); dev sobe limpo; módulos novos 200.
 - **Limite conhecido:** logos e fotos específicas (ex: coluna 3D) precisam ser enviados como assets; a IA usa a biblioteca de ícones/formas + imagens anexadas, não recria fotos.
+
+### 2026-05-29 (cont. 6) — Definir paleta em todas as artes
+- `lib/recolor.js` (`recolorSlides`): remapeia as cores usadas (backgrounds + fills) pela paleta escolhida, ordenando ambas por luminância (escura→escura, clara→clara) pra preservar contraste/estrutura. Imagens não têm fill (ignoradas).
+- Store `applyPaletteToAll(palette?)`: usa as `brandColors` (ou paleta passada) pra repintar todos os slides + recalcula `identity`. Passa por `update` → desfazível (Ctrl+Z).
+- Botão "🎨 Definir paleta em todas as artes" na seção Identidade da marca (desabilita sem cores). Build OK (249 módulos).

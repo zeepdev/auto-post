@@ -316,6 +316,8 @@ function BrandSection() {
   const updateBrandColor = useStore((s) => s.updateBrandColor)
   const removeBrandColor = useStore((s) => s.removeBrandColor)
   const setBackground = useStore((s) => s.setBackground)
+  const applyPaletteToAll = useStore((s) => s.applyPaletteToAll)
+  const slidesCount = useStore((s) => s.slides.length)
 
   return (
     <Section title="Identidade da marca">
@@ -346,6 +348,21 @@ function BrandSection() {
       <button className="btn block" onClick={() => addBrandColor()} style={{ marginTop: 8 }}>
         ＋ Adicionar cor
       </button>
+      <button
+        className="btn block primary"
+        style={{ marginTop: 8 }}
+        disabled={brandColors.length === 0}
+        onClick={() => applyPaletteToAll()}
+        title="Repinta todas as artes seguindo estas cores"
+      >
+        🎨 Definir paleta em todas as artes
+      </button>
+      {brandColors.length === 0 && (
+        <p className="hint">Adicione cores acima pra liberar.</p>
+      )}
+      {brandColors.length > 0 && (
+        <p className="hint">Aplica nas {slidesCount} arte(s). Dá pra desfazer com Ctrl+Z.</p>
+      )}
     </Section>
   )
 }
