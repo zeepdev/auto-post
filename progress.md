@@ -86,3 +86,6 @@
 - Dep `@mdi/js`. `components/IconLibrary.jsx`: modal com busca; faz `import('@mdi/js')` dinâmico → Vite gera chunk separado (`mdi-*.js`, ~803KB gzip) que só carrega ao abrir o buscador. Bundle principal segue leve (~154KB gzip).
 - Elemento `icon` agora guarda `path` (SVG). Renderer/exporter usam `el.path || ICONS[el.icon]`. Ícones MDI são autossuficientes (salvos no .atp). AI continua usando nomes curados (fallback resolve). `addIcon(name, path)`.
 - Botão "🔍 Mais ícones (biblioteca)" na seção Elementos; resultados limitados a 300 por busca. Build OK (254 módulos + chunk mdi).
+
+### 2026-05-29 (cont. 9) — IA com acesso aos ~7.400 ícones MDI
+- Em vez de enum fixo, a IA agora escreve o `icon` no padrão MDI kebab-case (ex: rocket-launch). `lib/mdi.js.resolveIconPaths` carrega @mdi/js (mesmo chunk lazy) e mapeia nome→path; `ContextPanel` resolve os nomes da spec antes de `specToSlides`, que injeta o `path` no elemento (fallback: ícones curados → estrela). Removido `ICON_NAMES` do `anthropic.js`. Prompt pede ícones temáticos. Build OK.

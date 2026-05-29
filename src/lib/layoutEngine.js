@@ -1,6 +1,7 @@
 import { nanoid } from '../store.js'
 import { getStageSize } from './stage.js'
 import { readableTextColor } from './colors.js'
+import { ICONS } from './icons.js'
 
 // Converte o "spec" de conteúdo devolvido pela IA em slides com elementos
 // posicionados (coordenadas lógicas do stage). Layout determinístico por tipo de
@@ -42,7 +43,8 @@ function bulletsToText(bullets) {
 }
 
 // Converte uma decoração da IA (coords relativas 0–1) num elemento posicionado.
-function decoToElement(d, w, h, accent) {
+// iconPaths: mapa nome-MDI → path SVG (resolvido antes, em ContextPanel).
+function decoToElement(d, w, h, accent, iconPaths = {}) {
   const size = (d.size || 0.2) * w
   const x = (d.x ?? 0.5) * w - size / 2
   const y = (d.y ?? 0.5) * h - size / 2
@@ -56,13 +58,16 @@ function decoToElement(d, w, h, accent) {
     rotation: d.rotation || 0,
     opacity: d.opacity ?? 1,
   }
-  if (d.shape === 'icon') return { ...base, type: 'icon', icon: d.icon || 'estrela' }
+  if (d.shape === 'icon') {
+    const path = iconPaths[d.icon] || ICONS[d.icon] || ICONS.estrela
+    return { ...base, type: 'icon', icon: d.icon || 'estrela', path }
+  }
   if (d.shape === 'circle') return { ...base, type: 'circle' }
   if (d.shape === 'triangle') return { ...base, type: 'triangle' }
   return { ...base, type: 'rect', cornerRadius: size * 0.15 } // quadrado/retângulo
 }
 
-export function specToSlides(spec, format, logo) {
+export function specToSlides(spec, format, logo, iconPaths = {}) {
   const { w, h } = getStageSize(format)
   const id = spec.identity || {}
   const bg = id.background || '#0E1116'
@@ -74,7 +79,7 @@ export function specToSlides(spec, format, logo) {
     const elements = []
 
     // decorações entram primeiro (ficam atrás do texto)
-    for (const d of s.decorations || []) elements.push(decoToElement(d, w, h, accent))
+    for (const d of s.decorations || []) elements.push(decoToElement(d, w, h, accent, iconPaths))
 
     if (s.kind === 'cover') {
       // fundo esmaecido (profundidade) — círculo grande de destaque

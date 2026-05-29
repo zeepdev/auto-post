@@ -4,14 +4,6 @@
 const API_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6'
 
-// Mantenha em sincronia com src/lib/icons.js (ICON_LIST).
-const ICON_NAMES = [
-  'estrela', 'coracao', 'raio', 'seta', 'escudo', 'diamante',
-  'mais', 'check', 'brilho', 'pino', 'fogo', 'pilar', 'engrenagem',
-  'casa', 'telefone', 'balao', 'grafico', 'lampada', 'play',
-  'coroa', 'aspas', 'foguete', 'selo',
-]
-
 const POST_TOOL = {
   name: 'create_post',
   description: 'Monta o conteúdo de um post ou carrossel para Instagram a partir do contexto.',
@@ -50,8 +42,8 @@ const POST_TOOL = {
                   shape: { type: 'string', enum: ['circle', 'triangle', 'square', 'icon'] },
                   icon: {
                     type: 'string',
-                    enum: ICON_NAMES,
-                    description: 'Obrigatório quando shape = "icon".',
+                    description:
+                      'Obrigatório quando shape="icon". Nome do ícone no padrão Material Design Icons em kebab-case, ex.: "rocket-launch", "shield-check", "trending-up", "home", "phone", "lightbulb-on", "star", "check-circle", "wrench", "chart-line".',
                   },
                   x: { type: 'number', description: 'Centro X relativo, 0 a 1.' },
                   y: { type: 'number', description: 'Centro Y relativo, 0 a 1.' },
@@ -87,7 +79,7 @@ export async function generateSpec({ contextText, images = [], mode, pages, pale
     'Você é um diretor de arte e copywriter sênior de social media, especialista em Instagram.',
     'Escreva sempre em português do Brasil, com linguagem clara, persuasiva e adequada ao público.',
     'Títulos curtos e impactantes; textos escaneáveis; nada de clichê vazio.',
-    'SEMPRE enriqueça a arte com "decorations" (formas geométricas ou ícones da lista). Em todo slide use: (1) UMA decoração grande e bem esmaecida (size 0.6–0.9, opacity 0.08–0.15, ex: pilar/engrenagem/diamante/escudo) como elemento de fundo pra dar profundidade, e (2) de 1 a 3 detalhes pequenos nos cantos/bordas (ex: aspas, brilho, raio, pontos). Nunca cubra o texto — decorações ficam atrás dele.',
+    'SEMPRE enriqueça a arte com "decorations" (formas geométricas ou ícones do Material Design Icons, nome em kebab-case). Em todo slide use: (1) UMA decoração grande e bem esmaecida (size 0.6–0.9, opacity 0.08–0.15, ex: ícone temático ou diamante/escudo) como elemento de fundo pra dar profundidade, e (2) de 1 a 3 detalhes pequenos nos cantos/bordas (ex: check-circle, star, lightning-bolt, arrow-right). Escolha ícones que combinem com o TEMA do post. Nunca cubra o texto — decorações ficam atrás dele.',
     'Combine as cores das decorações com a identity (accent e variações), variando opacidade pra dar camadas.',
     'Use a ferramenta create_post para devolver o conteúdo estruturado.',
     palette.length

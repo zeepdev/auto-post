@@ -3,6 +3,7 @@ import { useStore, buildIdentity, FORMATS } from '../store.js'
 import { fileToDataURL, downscaleDataURL } from '../lib/colors.js'
 import { generate } from '../lib/api.js'
 import { specToSlides } from '../lib/layoutEngine.js'
+import { resolveIconPaths } from '../lib/mdi.js'
 
 export default function ContextPanel() {
   const format = useStore((s) => s.format)
@@ -67,8 +68,19 @@ export default function ContextPanel() {
         pages,
         palette: colorPalette,
       })
+      // resolve os ícones (nomes MDI) que a IA escolheu, contra a biblioteca real
+      const iconNames = []
+      for (const sl of spec.slides || [])
+        for (const d of sl.decorations || []) if (d.shape === 'icon' && d.icon) iconNames.push(d.icon)
+      let iconPaths = {}
+      try {
+        iconPaths = await resolveIconPaths(iconNames)
+      } catch {
+        /* sem internet/lib: cai no fallback de ícones curados */
+      }
+
       const logo = logos.find((l) => l.id === logoId) || null
-      const slides = specToSlides(spec, outFormat, logo)
+      const slides = specToSlides(spec, outFormat, logo, iconPaths)
       applyGenerated(slides, spec.identity || buildIdentity(colorPalette), outFormat)
     } catch (err) {
       setError(err.message || String(err))
