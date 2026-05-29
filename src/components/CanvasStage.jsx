@@ -16,8 +16,10 @@ import { getStageSize } from '../lib/stage.js'
 import { loadImage } from '../lib/colors.js'
 import { trianglePoints, circleCenter, ICON_VIEWBOX } from '../lib/shapes.js'
 import { ICONS } from '../lib/icons.js'
+import { computeSnap } from '../lib/snapping.js'
 
-const SNAP = 6 // tolerância (px lógicos) pra "travar" no centro
+const ZOOM_MIN = 0.25
+const ZOOM_MAX = 4
 
 function useHTMLImage(src) {
   const [img, setImg] = useState(null)
@@ -62,20 +64,34 @@ export default function CanvasStage() {
   const stageRef = useRef(null)
   const trRef = useRef(null)
   const wrapRef = useRef(null)
-  const [scale, setScale] = useState(1)
-  const [guides, setGuides] = useState({ v: false, h: false })
+  const [fitScale, setFitScale] = useState(1)
+  const [zoom, setZoom] = useState(1) // multiplicador do "fit"
+  const [guideLines, setGuideLines] = useState([])
+
+  const scale = fitScale * zoom
 
   useEffect(() => {
     const fit = () => {
       const wrap = wrapRef.current
       if (!wrap) return
       const pad = 32
-      setScale(Math.min((wrap.clientWidth - pad) / w, (wrap.clientHeight - pad) / h, 1))
+      setFitScale(Math.min((wrap.clientWidth - pad) / w, (wrap.clientHeight - pad) / h, 1))
     }
     fit()
     window.addEventListener('resize', fit)
     return () => window.removeEventListener('resize', fit)
   }, [w, h])
+
+  const zoomBy = (factor) =>
+    setZoom((z) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z * factor)))
+  const resetZoom = () => setZoom(1)
+
+  // Ctrl + scroll = zoom
+  const onWheel = (e) => {
+    if (!e.ctrlKey && !e.metaKey) return
+    e.preventDefault()
+    zoomBy(e.deltaY < 0 ? 1.1 : 1 / 1.1)
+  }
 
   useEffect(() => {
     const tr = trRef.current
@@ -86,27 +102,26 @@ export default function CanvasStage() {
     tr.getLayer()?.batchDraw()
   }, [selectedId, slide])
 
-  // arrastar: "trava" no centro horizontal/vertical e mostra a guia
+  // arrastar: alinhamento inteligente (centro/bordas do canvas, margens e outros elementos)
   const onDragMove = (e) => {
     const node = e.target
-    const box = node.getClientRect({ relativeTo: node.getLayer() })
-    const cx = box.x + box.width / 2
-    const cy = box.y + box.height / 2
-    let v = false
-    let hh = false
-    if (Math.abs(cx - w / 2) < SNAP) {
-      node.x(node.x() + (w / 2 - cx))
-      v = true
-    }
-    if (Math.abs(cy - h / 2) < SNAP) {
-      node.y(node.y() + (h / 2 - cy))
-      hh = true
-    }
-    setGuides({ v, h: hh })
+    const layer = node.getLayer()
+    const box = node.getClientRect({ relativeTo: layer })
+    const others = slide.elements
+      .filter((el) => el.id !== node.id())
+      .map((el) => {
+        const n = layer.findOne(`#${el.id}`)
+        return n ? n.getClientRect({ relativeTo: layer }) : null
+      })
+      .filter(Boolean)
+    const { dx, dy, lines } = computeSnap(box, others, w, h, w * 0.05)
+    if (dx) node.x(node.x() + dx)
+    if (dy) node.y(node.y() + dy)
+    setGuideLines(lines)
   }
 
   const onDragEnd = (id) => (e) => {
-    setGuides({ v: false, h: false })
+    setGuideLines([])
     updateElement(id, { x: e.target.x(), y: e.target.y() })
   }
 
@@ -240,7 +255,12 @@ export default function CanvasStage() {
   }
 
   return (
-    <div className="canvas-wrap" ref={wrapRef}>
+    <div className="canvas-wrap" ref={wrapRef} onWheel={onWheel}>
+      <div className="zoom-bar">
+        <button onClick={() => zoomBy(1 / 1.2)} title="Zoom -">−</button>
+        <button onClick={resetZoom} title="Ajustar">{Math.round(scale * 100)}%</button>
+        <button onClick={() => zoomBy(1.2)} title="Zoom +">＋</button>
+      </div>
       <div className="canvas-frame" style={{ width: w * scale, height: h * scale }}>
         <Stage
           ref={stageRef}
@@ -256,12 +276,16 @@ export default function CanvasStage() {
             <Rect __bg x={0} y={0} width={w} height={h} fill={slide.background} />
             {slide.elements.map(renderElement)}
 
-            {guides.v && (
-              <Line points={[w / 2, 0, w / 2, h]} stroke="#ff3da6" strokeWidth={1} dash={[6, 6]} listening={false} />
-            )}
-            {guides.h && (
-              <Line points={[0, h / 2, w, h / 2]} stroke="#ff3da6" strokeWidth={1} dash={[6, 6]} listening={false} />
-            )}
+            {guideLines.map((pts, i) => (
+              <Line
+                key={i}
+                points={pts}
+                stroke="#ff3da6"
+                strokeWidth={1 / scale}
+                dash={[6 / scale, 6 / scale]}
+                listening={false}
+              />
+            ))}
 
             <Transformer
               ref={trRef}

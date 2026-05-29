@@ -86,6 +86,7 @@ export async function generateSpec({ contextText, images = [], mode, pages, pale
     'Escreva sempre em português do Brasil, com linguagem clara, persuasiva e adequada ao público.',
     'Títulos curtos e impactantes; textos escaneáveis; nada de clichê vazio.',
     'Quando fizer sentido, use "decorations" (formas geométricas ou ícones da lista) de forma sutil pra enriquecer a arte, sem poluir nem cobrir o texto. Posicione nos cantos ou bordas.',
+    'Você pode usar UMA decoração grande e bem esmaecida (size 0.6–0.9, opacity ~0.1, ex: pilar/engrenagem/diamante) como elemento de fundo pra dar profundidade, além de pequenos detalhes nos cantos.',
     'Use a ferramenta create_post para devolver o conteúdo estruturado.',
     palette.length
       ? `Paleta de marca sugerida (use em identity, com cores legíveis): ${palette.join(', ')}.`

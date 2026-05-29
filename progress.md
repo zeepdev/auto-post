@@ -61,3 +61,11 @@
 - **IA enriquece a arte:** tool schema ganhou `decorations` (shape/icon + coords relativas 0–1 + cor); `layoutEngine.decoToElement` converte (decorações ficam atrás do texto). `ICON_NAMES` em `api/_lib/anthropic.js` espelha `icons.js` (manter em sincronia).
 - **IA com seletor de formato** (ContextPanel) — gera direto em feed/quadrado/story; `applyGenerated` agora também troca o formato do projeto.
 - **Validação:** `npm run build` OK (247 módulos); dev (web+API) sobe limpo; módulos e proxy `/api` retornam 200; login via proxy OK.
+
+### 2026-05-29 (cont. 5) — Guias inteligentes, zoom e layout premium da IA
+- **Alinhamento inteligente tipo Canva** (`lib/snapping.js` + `CanvasStage.onDragMove`): ao arrastar, faz snap a bordas/centro de OUTROS elementos, ao centro do canvas e às margens de segurança (5%); desenha linhas-guia rosas. Substitui o snap só-de-centro anterior. Usa `getClientRect` (cobre rotação/escala).
+- **Zoom**: `fitScale × zoom`; barra flutuante (−/%/+, clique no % = ajustar) + Ctrl/⌘ + scroll. `.canvas-wrap` com overflow auto pra rolar quando ampliado. Espessura das guias compensa o zoom (`1/scale`).
+- **Layout premium da IA** (`layoutEngine` cover): círculo de fundo esmaecido (opacity 0.1), aspas grandes (Playfair) topo-esq e base-dir, barra de destaque, headline Bebas maior. Prompt do `anthropic.js` pede UMA decoração grande esmaecida (pilar/engrenagem) de fundo + detalhes nos cantos — aproxima do nível da referência (Athena/Grand Vista).
+- **Cor dos elementos** confirmada no inspector pra rect/circle/triangle/icon (e troca de ícone). 
+- **Validação:** `npm run build` OK (248 módulos); dev sobe limpo; módulos novos 200.
+- **Limite conhecido:** logos e fotos específicas (ex: coluna 3D) precisam ser enviados como assets; a IA usa a biblioteca de ícones/formas + imagens anexadas, não recria fotos.
