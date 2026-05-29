@@ -3,6 +3,7 @@ import { useStore, FORMATS } from '../store.js'
 import { fileToDataURL, extractPalette, readableTextColor, loadImage } from '../lib/colors.js'
 import { getStageSize } from '../lib/stage.js'
 import { TEMPLATES } from '../lib/templates.js'
+import { ICONS, ICON_LIST } from '../lib/icons.js'
 import ContextPanel from './ContextPanel.jsx'
 
 export default function LeftPanel() {
@@ -31,7 +32,9 @@ function DesignTab() {
   const setBackground = useStore((s) => s.setBackground)
   const addImage = useStore((s) => s.addImage)
   const applyTemplate = useStore((s) => s.applyTemplate)
+  const brandColors = useStore((s) => s.brandColors)
   const slide = useStore((s) => s.slides[s.currentIndex])
+  const tplPalette = brandColors.length ? brandColors : palette
 
   const refInput = useRef(null)
   const imgInput = useRef(null)
@@ -86,6 +89,8 @@ function DesignTab() {
       </Section>
 
       <LogoSection />
+      <BrandSection />
+      <ElementsSection />
 
       <Section title="Referências">
         <p className="hint">Suba prints/posts; o app extrai a paleta de cores.</p>
@@ -135,7 +140,7 @@ function DesignTab() {
             <button
               key={t.key}
               className="tpl-btn"
-              onClick={() => applyTemplate(t.build(getStageSize(format), palette))}
+              onClick={() => applyTemplate(t.build(getStageSize(format), tplPalette))}
               title={`Aplicar "${t.name}" no slide atual`}
             >
               {t.name}
@@ -301,6 +306,78 @@ function PackageSection() {
           </button>
         </div>
       ))}
+    </Section>
+  )
+}
+
+function BrandSection() {
+  const brandColors = useStore((s) => s.brandColors)
+  const addBrandColor = useStore((s) => s.addBrandColor)
+  const updateBrandColor = useStore((s) => s.updateBrandColor)
+  const removeBrandColor = useStore((s) => s.removeBrandColor)
+  const setBackground = useStore((s) => s.setBackground)
+
+  return (
+    <Section title="Identidade da marca">
+      <p className="hint">
+        Defina as cores da sua marca. Elas viram a base dos templates e da geração por IA.
+      </p>
+      {brandColors.map((c, i) => (
+        <div key={i} className="brand-row">
+          <input
+            type="color"
+            value={c}
+            onChange={(e) => updateBrandColor(i, e.target.value)}
+          />
+          <input
+            type="text"
+            value={c}
+            onChange={(e) => updateBrandColor(i, e.target.value)}
+            spellCheck={false}
+          />
+          <button className="btn tiny" onClick={() => setBackground(c)} title="Usar como fundo">
+            fundo
+          </button>
+          <button className="btn tiny danger" onClick={() => removeBrandColor(i)} title="Remover">
+            ×
+          </button>
+        </div>
+      ))}
+      <button className="btn block" onClick={() => addBrandColor()} style={{ marginTop: 8 }}>
+        ＋ Adicionar cor
+      </button>
+    </Section>
+  )
+}
+
+function ElementsSection() {
+  const addCircle = useStore((s) => s.addCircle)
+  const addTriangle = useStore((s) => s.addTriangle)
+  const addRect = useStore((s) => s.addRect)
+  const addIcon = useStore((s) => s.addIcon)
+
+  return (
+    <Section title="Elementos">
+      <div className="row gap">
+        <button className="btn block" onClick={addRect}>▭</button>
+        <button className="btn block" onClick={addCircle}>●</button>
+        <button className="btn block" onClick={addTriangle}>▲</button>
+      </div>
+      <div className="sub">Ícones</div>
+      <div className="icon-grid">
+        {ICON_LIST.map((name) => (
+          <button
+            key={name}
+            className="icon-cell"
+            onClick={() => addIcon(name)}
+            title={name}
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path d={ICONS[name]} fill="currentColor" />
+            </svg>
+          </button>
+        ))}
+      </div>
     </Section>
   )
 }

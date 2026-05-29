@@ -308,6 +308,55 @@ body {
 }
 .btn.big { padding: 13px; font-size: 14px; }
 
+/* ---------- Ícones / elementos ---------- */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+.icon-cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+}
+.icon-cell:hover { border-color: var(--brand); }
+.icon-cell.on { border-color: var(--brand); background: #1d1a33; color: var(--brand-2); }
+
+/* ---------- Cores da marca ---------- */
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.brand-row input[type='color'] {
+  width: 34px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: none;
+  cursor: pointer;
+  flex: none;
+}
+.brand-row input[type='text'] {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 7px 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
 /* ---------- Login ---------- */
 .login-screen {
   height: 100vh;

@@ -49,3 +49,15 @@
 - **Dev local:** `dev-server.js` (http puro, dotenv) roda os handlers; Vite faz proxy `/api`→3000; `npm run dev` sobe ambos via `concurrently`. Deps novas: concurrently, dotenv.
 - **Deploy:** `vercel.json` (maxDuration 60s). `.env.example` documenta as env vars. Mesmas vars devem ir em Vercel → Settings → Environment Variables.
 - **Validação E2E local:** login OK (retorna token); senha errada→401; `/api/generate` sem token→401; com token + chave fake→chega na Claude (erro "invalid x-api-key", esperado). `npm run build` OK (245 módulos). Pipeline de auth+proxy 100% funcional; só falta a chave real pra gerar de verdade.
+- **Deploy concluído pelo dono na Vercel; funcionando.** Repo em github.com/zeepdev/auto-post.
+
+### 2026-05-29 (cont. 4) — Editor avançado: reflow, undo/redo, guias, marca, elementos
+- **Formato quadrado 1080×1080** adicionado (`FORMATS.square`).
+- **Reflow ao trocar de formato** (`reflowSlides` no store): posições escalam por eixo, fontSize/tamanhos pela largura — a arte se adapta em vez de manter coords fixas.
+- **Undo/Redo** (store `past`/`future`, limite 60): `update()` empilha snapshot quando slides/format mudam; `undo`/`redo` usam `set` direto (não re-empilham). Botões no Header + atalhos Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z no App.
+- **Guias de centralização** ("trava"): `CanvasStage.onDragMove` usa `getClientRect` pra detectar centro do elemento perto do centro do stage (tolerância 6px), faz snap e mostra linha-guia rosa (X e Y).
+- **Identidade da marca**: `brandColors` (persist `auto-post:brand:v1`) com add/editar/remover (`BrandSection`). Têm prioridade em templates e na geração por IA.
+- **Biblioteca de elementos:** novos tipos `circle`, `triangle`, `icon` (além de rect). Geometria compartilhada em `lib/shapes.js`; ícones curados em `lib/icons.js` (13 ícones, viewBox 24). Render no canvas via Group (origem top-left, drag/transform unificados) e no `exporter` via Konva puro. `ElementsSection` (LeftPanel) + botões no RightPanel + troca de ícone no inspector.
+- **IA enriquece a arte:** tool schema ganhou `decorations` (shape/icon + coords relativas 0–1 + cor); `layoutEngine.decoToElement` converte (decorações ficam atrás do texto). `ICON_NAMES` em `api/_lib/anthropic.js` espelha `icons.js` (manter em sincronia).
+- **IA com seletor de formato** (ContextPanel) — gera direto em feed/quadrado/story; `applyGenerated` agora também troca o formato do projeto.
+- **Validação:** `npm run build` OK (247 módulos); dev (web+API) sobe limpo; módulos e proxy `/api` retornam 200; login via proxy OK.

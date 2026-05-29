@@ -9,6 +9,10 @@ export default function Header() {
   const reset = useStore((s) => s.reset)
   const username = useStore((s) => s.username)
   const logout = useStore((s) => s.logout)
+  const undo = useStore((s) => s.undo)
+  const redo = useStore((s) => s.redo)
+  const canUndo = useStore((s) => s.past.length > 0)
+  const canRedo = useStore((s) => s.future.length > 0)
   const [mime, setMime] = useState('image/png')
   const [busy, setBusy] = useState(false)
 
@@ -41,6 +45,14 @@ export default function Header() {
       </div>
 
       <div className="header-actions">
+        <div className="seg">
+          <button onClick={undo} disabled={!canUndo} title="Desfazer (Ctrl+Z)">
+            ↶
+          </button>
+          <button onClick={redo} disabled={!canRedo} title="Refazer (Ctrl+Y)">
+            ↷
+          </button>
+        </div>
         <div className="seg">
           <button
             className={mime === 'image/png' ? 'on' : ''}

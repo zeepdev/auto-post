@@ -20,12 +20,34 @@ export const nanoid = () => Math.random().toString(36).slice(2, 10)
 
 export const FORMATS = {
   feed: { key: 'feed', label: 'Feed 1080×1350', w: 1080, h: 1350 },
+  square: { key: 'square', label: 'Quadrado 1080×1080', w: 1080, h: 1080 },
   story: { key: 'story', label: 'Story 1080×1920', w: 1080, h: 1920 },
 }
 
 const STORAGE_KEY = 'auto-post:project:v1'
 const LOGOS_KEY = 'auto-post:logos:v1'
 const PKGS_KEY = 'auto-post:packages:v1'
+const BRAND_KEY = 'auto-post:brand:v1'
+const HISTORY_LIMIT = 60
+
+// Reposiciona/redimensiona os elementos ao trocar de formato, pra arte se adaptar
+// em vez de manter coordenadas fixas. Posições escalam pelo eixo; tamanhos de
+// texto/ícone pela largura (que é a dimensão de leitura).
+function reflowSlides(slides, oldSize, newSize) {
+  const sx = newSize.w / oldSize.w
+  const sy = newSize.h / oldSize.h
+  return slides.map((sl) => ({
+    ...sl,
+    elements: sl.elements.map((e) => ({
+      ...e,
+      x: e.x * sx,
+      y: e.y * sy,
+      width: e.width != null ? e.width * sx : e.width,
+      height: e.height != null ? e.height * sy : e.height,
+      fontSize: e.fontSize != null ? Math.round(e.fontSize * sx) : e.fontSize,
+    })),
+  }))
+}
 
 function loadJSON(key) {
   try {
@@ -74,8 +96,18 @@ function persist(get) {
 }
 
 export const useStore = create((set, get) => {
+  // `update` aplica a mudança e, quando ela altera o conteúdo do projeto
+  // (slides/format), empilha um snapshot no histórico pra permitir desfazer/refazer.
   const update = (fn) => {
-    set(fn)
+    set((s) => {
+      const patch = fn(s)
+      const touched =
+        (patch.slides && patch.slides !== s.slides) ||
+        (patch.format && patch.format !== s.format)
+      if (!touched) return patch
+      const snap = { slides: s.slides, format: s.format, currentIndex: s.currentIndex }
+      return { ...patch, past: [...s.past, snap].slice(-HISTORY_LIMIT), future: [] }
+    })
     persist(get)
   }
 
@@ -94,12 +126,56 @@ export const useStore = create((set, get) => {
     references: [],
     logos: loadJSON(LOGOS_KEY),
     packages: loadJSON(PKGS_KEY),
+    brandColors: loadJSON(BRAND_KEY),
     identity: null,
     token: getToken(),
     username: getUsername(),
+    past: [],
+    future: [],
 
-    // ---- formato ----
-    setFormat: (key) => update(() => ({ format: FORMATS[key], selectedId: null })),
+    // ---- formato ---- (adapta a arte ao novo formato)
+    setFormat: (key) =>
+      update((s) => {
+        const next = FORMATS[key]
+        if (!next || next.key === s.format.key) return {}
+        const oldSize = getStageSize(s.format)
+        const newSize = getStageSize(next)
+        return {
+          format: next,
+          slides: reflowSlides(s.slides, oldSize, newSize),
+          selectedId: null,
+        }
+      }),
+
+    // ---- histórico ---- (não passam pelo `update` pra não re-empilhar)
+    undo: () => {
+      set((s) => {
+        if (!s.past.length) return {}
+        const prev = s.past[s.past.length - 1]
+        const cur = { slides: s.slides, format: s.format, currentIndex: s.currentIndex }
+        return {
+          ...prev,
+          past: s.past.slice(0, -1),
+          future: [...s.future, cur].slice(-HISTORY_LIMIT),
+          selectedId: null,
+        }
+      })
+      persist(get)
+    },
+    redo: () => {
+      set((s) => {
+        if (!s.future.length) return {}
+        const next = s.future[s.future.length - 1]
+        const cur = { slides: s.slides, format: s.format, currentIndex: s.currentIndex }
+        return {
+          ...next,
+          future: s.future.slice(0, -1),
+          past: [...s.past, cur].slice(-HISTORY_LIMIT),
+          selectedId: null,
+        }
+      })
+      persist(get)
+    },
 
     // ---- slides ----
     addSlide: () =>
@@ -170,6 +246,58 @@ export const useStore = create((set, get) => {
         }
         return addElToCurrent(s, el)
       }),
+    addCircle: () =>
+      update((s) => {
+        const { w, h } = getStageSize(s.format)
+        const d = w * 0.3
+        const el = {
+          id: nanoid(),
+          type: 'circle',
+          x: w * 0.35,
+          y: h * 0.4,
+          width: d,
+          height: d,
+          fill: '#6C5CE7',
+          rotation: 0,
+          opacity: 1,
+        }
+        return addElToCurrent(s, el)
+      }),
+    addTriangle: () =>
+      update((s) => {
+        const { w, h } = getStageSize(s.format)
+        const d = w * 0.35
+        const el = {
+          id: nanoid(),
+          type: 'triangle',
+          x: w * 0.32,
+          y: h * 0.38,
+          width: d,
+          height: d,
+          fill: '#6C5CE7',
+          rotation: 0,
+          opacity: 1,
+        }
+        return addElToCurrent(s, el)
+      }),
+    addIcon: (icon) =>
+      update((s) => {
+        const { w, h } = getStageSize(s.format)
+        const d = w * 0.22
+        const el = {
+          id: nanoid(),
+          type: 'icon',
+          icon,
+          x: w * 0.4,
+          y: h * 0.4,
+          width: d,
+          height: d,
+          fill: '#FFFFFF',
+          rotation: 0,
+          opacity: 1,
+        }
+        return addElToCurrent(s, el)
+      }),
     addImage: (src, naturalW, naturalH) =>
       update((s) => {
         const { w } = getStageSize(s.format)
@@ -226,6 +354,26 @@ export const useStore = create((set, get) => {
     // ---- referências / paleta ----
     addReference: (src) => set((s) => ({ references: [src, ...s.references].slice(0, 8) })),
     setPalette: (palette) => set({ palette }),
+
+    // ---- cores da marca (identidade definida manualmente) ----
+    addBrandColor: (color = '#6C5CE7') =>
+      set((s) => {
+        const brandColors = [...s.brandColors, color].slice(0, 12)
+        saveJSON(BRAND_KEY, brandColors)
+        return { brandColors }
+      }),
+    updateBrandColor: (i, color) =>
+      set((s) => {
+        const brandColors = s.brandColors.map((c, idx) => (idx === i ? color : c))
+        saveJSON(BRAND_KEY, brandColors)
+        return { brandColors }
+      }),
+    removeBrandColor: (i) =>
+      set((s) => {
+        const brandColors = s.brandColors.filter((_, idx) => idx !== i)
+        saveJSON(BRAND_KEY, brandColors)
+        return { brandColors }
+      }),
 
     // ---- templates ----
     applyTemplate: (built) => patchCurrentSlide(built),
@@ -307,13 +455,14 @@ export const useStore = create((set, get) => {
       clearSession()
       set({ token: '', username: '' })
     },
-    // Substitui o projeto pelos slides gerados pela IA.
-    applyGenerated: (slides, identity) =>
+    // Substitui o projeto pelos slides gerados pela IA (e opcionalmente o formato).
+    applyGenerated: (slides, identity, format) =>
       update(() => ({
         slides: slides.length ? slides : [blankSlide()],
         currentIndex: 0,
         selectedId: null,
         identity: identity || null,
+        ...(format ? { format } : {}),
       })),
 
     reset: () =>

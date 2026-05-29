@@ -1,5 +1,6 @@
 import { useStore } from '../store.js'
 import { FONTS } from '../lib/fonts.js'
+import { ICONS, ICON_LIST } from '../lib/icons.js'
 
 export default function RightPanel() {
   const slide = useStore((s) => s.slides[s.currentIndex])
@@ -9,9 +10,12 @@ export default function RightPanel() {
   const moveElement = useStore((s) => s.moveElement)
   const addText = useStore((s) => s.addText)
   const addRect = useStore((s) => s.addRect)
+  const addCircle = useStore((s) => s.addCircle)
+  const addTriangle = useStore((s) => s.addTriangle)
   const setBackground = useStore((s) => s.setBackground)
 
   const el = slide.elements.find((e) => e.id === selectedId)
+  const isShape = el && ['rect', 'circle', 'triangle', 'icon'].includes(el.type)
 
   return (
     <aside className="panel right">
@@ -19,7 +23,11 @@ export default function RightPanel() {
         <h3>Adicionar</h3>
         <div className="row gap">
           <button className="btn block" onClick={addText}>＋ Texto</button>
-          <button className="btn block" onClick={addRect}>＋ Forma</button>
+          <button className="btn block" onClick={addRect}>▭ Quadrado</button>
+        </div>
+        <div className="row gap" style={{ marginTop: 8 }}>
+          <button className="btn block" onClick={addCircle}>● Círculo</button>
+          <button className="btn block" onClick={addTriangle}>▲ Triângulo</button>
         </div>
       </section>
 
@@ -94,14 +102,35 @@ export default function RightPanel() {
           </>
         )}
 
-        {el?.type === 'rect' && (
+        {isShape && (
           <>
             <label className="fld">
               <span>Cor</span>
               <Color value={el.fill} onChange={(v) => updateElement(el.id, { fill: v })} />
             </label>
-            <Range label="Cantos" min={0} max={120} value={el.cornerRadius || 0}
-              onChange={(v) => updateElement(el.id, { cornerRadius: v })} />
+            {el.type === 'rect' && (
+              <Range label="Cantos" min={0} max={120} value={el.cornerRadius || 0}
+                onChange={(v) => updateElement(el.id, { cornerRadius: v })} />
+            )}
+            {el.type === 'icon' && (
+              <label className="fld">
+                <span>Ícone</span>
+                <div className="icon-grid">
+                  {ICON_LIST.map((name) => (
+                    <button
+                      key={name}
+                      className={`icon-cell ${el.icon === name ? 'on' : ''}`}
+                      onClick={() => updateElement(el.id, { icon: name })}
+                      title={name}
+                    >
+                      <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path d={ICONS[name]} fill="currentColor" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              </label>
+            )}
           </>
         )}
 

@@ -4,6 +4,12 @@
 const API_URL = 'https://api.anthropic.com/v1/messages'
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6'
 
+// Mantenha em sincronia com src/lib/icons.js (ICON_LIST).
+const ICON_NAMES = [
+  'estrela', 'coracao', 'raio', 'seta', 'escudo', 'diamante',
+  'mais', 'check', 'brilho', 'pino', 'fogo', 'pilar', 'engrenagem',
+]
+
 const POST_TOOL = {
   name: 'create_post',
   description: 'Monta o conteúdo de um post ou carrossel para Instagram a partir do contexto.',
@@ -32,6 +38,29 @@ const POST_TOOL = {
             body: { type: 'string' },
             bullets: { type: 'array', items: { type: 'string' } },
             footer: { type: 'string' },
+            decorations: {
+              type: 'array',
+              description:
+                'Elementos visuais decorativos pra enriquecer a arte (ficam atrás do texto). Use com moderação (0 a 4 por slide).',
+              items: {
+                type: 'object',
+                properties: {
+                  shape: { type: 'string', enum: ['circle', 'triangle', 'square', 'icon'] },
+                  icon: {
+                    type: 'string',
+                    enum: ICON_NAMES,
+                    description: 'Obrigatório quando shape = "icon".',
+                  },
+                  x: { type: 'number', description: 'Centro X relativo, 0 a 1.' },
+                  y: { type: 'number', description: 'Centro Y relativo, 0 a 1.' },
+                  size: { type: 'number', description: 'Tamanho relativo à largura, 0 a 1.' },
+                  color: { type: 'string', description: 'Cor hex.' },
+                  opacity: { type: 'number', description: '0 a 1.' },
+                  rotation: { type: 'number' },
+                },
+                required: ['shape'],
+              },
+            },
           },
           required: ['kind', 'title'],
         },
@@ -56,6 +85,7 @@ export async function generateSpec({ contextText, images = [], mode, pages, pale
     'Você é um diretor de arte e copywriter sênior de social media, especialista em Instagram.',
     'Escreva sempre em português do Brasil, com linguagem clara, persuasiva e adequada ao público.',
     'Títulos curtos e impactantes; textos escaneáveis; nada de clichê vazio.',
+    'Quando fizer sentido, use "decorations" (formas geométricas ou ícones da lista) de forma sutil pra enriquecer a arte, sem poluir nem cobrir o texto. Posicione nos cantos ou bordas.',
     'Use a ferramenta create_post para devolver o conteúdo estruturado.',
     palette.length
       ? `Paleta de marca sugerida (use em identity, com cores legíveis): ${palette.join(', ')}.`

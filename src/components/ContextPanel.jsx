@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { useStore, buildIdentity } from '../store.js'
+import { useStore, buildIdentity, FORMATS } from '../store.js'
 import { fileToDataURL, downscaleDataURL } from '../lib/colors.js'
 import { generate } from '../lib/api.js'
 import { specToSlides } from '../lib/layoutEngine.js'
@@ -7,6 +7,7 @@ import { specToSlides } from '../lib/layoutEngine.js'
 export default function ContextPanel() {
   const format = useStore((s) => s.format)
   const palette = useStore((s) => s.palette)
+  const brandColors = useStore((s) => s.brandColors)
   const logos = useStore((s) => s.logos)
   const packages = useStore((s) => s.packages)
   const applyGenerated = useStore((s) => s.applyGenerated)
@@ -16,6 +17,7 @@ export default function ContextPanel() {
   const [images, setImages] = useState([]) // {src, name}
   const [mode, setMode] = useState('carousel')
   const [pages, setPages] = useState(5)
+  const [formatKey, setFormatKey] = useState(format.key)
   const [logoId, setLogoId] = useState('')
   const [pkgId, setPkgId] = useState('')
   const [busy, setBusy] = useState(false)
@@ -48,6 +50,9 @@ export default function ContextPanel() {
       return
     }
     const pkg = packages.find((p) => p.id === pkgId)
+    const outFormat = FORMATS[formatKey] || format
+    // cores da marca têm prioridade; senão paleta do pacote; senão a extraída
+    const colorPalette = brandColors.length ? brandColors : pkg?.palette?.length ? pkg.palette : palette
     setBusy(true)
     try {
       // reduz as imagens antes de enviar pro backend (limite de payload)
@@ -60,11 +65,11 @@ export default function ContextPanel() {
         images: ctxImages,
         mode,
         pages,
-        palette: pkg?.palette?.length ? pkg.palette : palette,
+        palette: colorPalette,
       })
       const logo = logos.find((l) => l.id === logoId) || null
-      const slides = specToSlides(spec, format, logo)
-      applyGenerated(slides, spec.identity || buildIdentity(pkg?.palette || palette))
+      const slides = specToSlides(spec, outFormat, logo)
+      applyGenerated(slides, spec.identity || buildIdentity(colorPalette), outFormat)
     } catch (err) {
       setError(err.message || String(err))
     } finally {
@@ -123,6 +128,16 @@ export default function ContextPanel() {
 
       <section className="section">
         <h3>Formato de saída</h3>
+        <label className="fld">
+          <span>Tamanho da arte</span>
+          <select value={formatKey} onChange={(e) => setFormatKey(e.target.value)}>
+            {Object.values(FORMATS).map((f) => (
+              <option key={f.key} value={f.key}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="seg full">
           <button className={mode === 'post' ? 'on' : ''} onClick={() => setMode('post')}>
             Post único

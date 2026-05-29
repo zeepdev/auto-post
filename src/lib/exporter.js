@@ -2,6 +2,8 @@ import Konva from 'konva'
 import { getStageSize, exportPixelRatio } from './stage.js'
 import { loadImage } from './colors.js'
 import { ensureFontsLoaded } from './fonts.js'
+import { trianglePoints, circleCenter, ICON_VIEWBOX } from './shapes.js'
+import { ICONS } from './icons.js'
 
 // Constrói um Konva.Stage offscreen a partir dos dados de um slide e devolve o dataURL.
 // Reconstruir (em vez de ler o stage da tela) garante que a arte exportada não tenha
@@ -66,6 +68,26 @@ async function renderSlideToDataURL(slide, format, mime, quality) {
           opacity: el.opacity ?? 1,
         })
       )
+    } else if (el.type === 'circle') {
+      const { cx, cy, r } = circleCenter(el)
+      const g = new Konva.Group({ x: el.x, y: el.y, rotation: el.rotation || 0, opacity: el.opacity ?? 1 })
+      g.add(new Konva.Circle({ x: cx, y: cy, radius: r, fill: el.fill }))
+      layer.add(g)
+    } else if (el.type === 'triangle') {
+      const g = new Konva.Group({ x: el.x, y: el.y, rotation: el.rotation || 0, opacity: el.opacity ?? 1 })
+      g.add(new Konva.Line({ points: trianglePoints(el.width, el.height), closed: true, fill: el.fill }))
+      layer.add(g)
+    } else if (el.type === 'icon') {
+      const g = new Konva.Group({ x: el.x, y: el.y, rotation: el.rotation || 0, opacity: el.opacity ?? 1 })
+      g.add(
+        new Konva.Path({
+          data: ICONS[el.icon] || ICONS.estrela,
+          fill: el.fill,
+          scaleX: el.width / ICON_VIEWBOX,
+          scaleY: el.height / ICON_VIEWBOX,
+        })
+      )
+      layer.add(g)
     }
   }
 

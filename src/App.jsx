@@ -12,25 +12,36 @@ export default function App() {
   const token = useStore((s) => s.token)
   const selectedId = useStore((s) => s.selectedId)
   const removeElement = useStore((s) => s.removeElement)
+  const undo = useStore((s) => s.undo)
+  const redo = useStore((s) => s.redo)
 
   useEffect(() => {
     ensureFontsLoaded()
   }, [])
 
-  // Delete/Backspace remove o elemento selecionado (exceto digitando em campos).
+  // Atalhos: Delete remove o selecionado; Ctrl+Z desfaz; Ctrl+Y / Ctrl+Shift+Z refaz.
   useEffect(() => {
     const onKey = (e) => {
-      if (!selectedId) return
       const t = e.target.tagName
-      if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return
-      if (e.key === 'Delete' || e.key === 'Backspace') {
+      const typing = t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT'
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault()
+        e.shiftKey ? redo() : undo()
+        return
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+        e.preventDefault()
+        redo()
+        return
+      }
+      if (!typing && selectedId && (e.key === 'Delete' || e.key === 'Backspace')) {
         e.preventDefault()
         removeElement(selectedId)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [selectedId, removeElement])
+  }, [selectedId, removeElement, undo, redo])
 
   if (!token) return <Login />
 

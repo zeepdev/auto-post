@@ -41,6 +41,27 @@ function bulletsToText(bullets) {
   return bullets.map((b, i) => `${i + 1}.  ${b}`).join('\n\n')
 }
 
+// Converte uma decoração da IA (coords relativas 0–1) num elemento posicionado.
+function decoToElement(d, w, h, accent) {
+  const size = (d.size || 0.2) * w
+  const x = (d.x ?? 0.5) * w - size / 2
+  const y = (d.y ?? 0.5) * h - size / 2
+  const base = {
+    id: nanoid(),
+    x,
+    y,
+    width: size,
+    height: size,
+    fill: d.color || accent,
+    rotation: d.rotation || 0,
+    opacity: d.opacity ?? 1,
+  }
+  if (d.shape === 'icon') return { ...base, type: 'icon', icon: d.icon || 'estrela' }
+  if (d.shape === 'circle') return { ...base, type: 'circle' }
+  if (d.shape === 'triangle') return { ...base, type: 'triangle' }
+  return { ...base, type: 'rect', cornerRadius: size * 0.15 } // quadrado/retângulo
+}
+
 export function specToSlides(spec, format, logo) {
   const { w, h } = getStageSize(format)
   const id = spec.identity || {}
@@ -51,6 +72,9 @@ export function specToSlides(spec, format, logo) {
 
   return (spec.slides || []).map((s) => {
     const elements = []
+
+    // decorações entram primeiro (ficam atrás do texto)
+    for (const d of s.decorations || []) elements.push(decoToElement(d, w, h, accent))
 
     if (s.kind === 'cover') {
       elements.push({
