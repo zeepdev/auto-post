@@ -4,6 +4,7 @@ import { fileToDataURL, extractPalette, readableTextColor, loadImage } from '../
 import { getStageSize } from '../lib/stage.js'
 import { TEMPLATES } from '../lib/templates.js'
 import { ICONS, ICON_LIST } from '../lib/icons.js'
+import { EMOJIS } from '../lib/emojis.js'
 import ContextPanel from './ContextPanel.jsx'
 
 export default function LeftPanel() {
@@ -372,6 +373,7 @@ function ElementsSection() {
   const addTriangle = useStore((s) => s.addTriangle)
   const addRect = useStore((s) => s.addRect)
   const addIcon = useStore((s) => s.addIcon)
+  const addEmoji = useStore((s) => s.addEmoji)
 
   return (
     <Section title="Elementos">
@@ -380,7 +382,7 @@ function ElementsSection() {
         <button className="btn block" onClick={addCircle}>●</button>
         <button className="btn block" onClick={addTriangle}>▲</button>
       </div>
-      <div className="sub">Ícones</div>
+      <div className="sub">Ícones (recoloríveis)</div>
       <div className="icon-grid">
         {ICON_LIST.map((name) => (
           <button
@@ -392,6 +394,14 @@ function ElementsSection() {
             <svg viewBox="0 0 24 24" width="20" height="20">
               <path d={ICONS[name]} fill="currentColor" />
             </svg>
+          </button>
+        ))}
+      </div>
+      <div className="sub">Emojis</div>
+      <div className="emoji-grid">
+        {EMOJIS.map((e) => (
+          <button key={e} className="emoji-cell" onClick={() => addEmoji(e)} title={e}>
+            {e}
           </button>
         ))}
       </div>

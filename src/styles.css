@@ -353,6 +353,24 @@ body {
 .icon-cell:hover { border-color: var(--brand); }
 .icon-cell.on { border-color: var(--brand); background: #1d1a33; color: var(--brand-2); }
 
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+.emoji-cell {
+  aspect-ratio: 1;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+.emoji-cell:hover { border-color: var(--brand); }
+
 /* ---------- Cores da marca ---------- */
 .brand-row {
   display: flex;

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useStore } from '../store.js'
 import { downloadSlide, downloadAll } from '../lib/exporter.js'
+import { saveProject, readProjectFile } from '../lib/projectFile.js'
 
 export default function Header() {
   const format = useStore((s) => s.format)
@@ -13,8 +14,26 @@ export default function Header() {
   const redo = useStore((s) => s.redo)
   const canUndo = useStore((s) => s.past.length > 0)
   const canRedo = useStore((s) => s.future.length > 0)
+  const loadProject = useStore((s) => s.loadProject)
   const [mime, setMime] = useState('image/png')
   const [busy, setBusy] = useState(false)
+  const fileRef = useRef(null)
+
+  const onSave = () => {
+    const name = window.prompt('Nome do arquivo (.atp):', 'meu-post')
+    if (name) saveProject(name, { format, slides })
+  }
+  const onOpen = async (e) => {
+    const f = e.target.files?.[0]
+    e.target.value = ''
+    if (!f) return
+    try {
+      const data = await readProjectFile(f)
+      loadProject(data)
+    } catch (err) {
+      window.alert(err.message)
+    }
+  }
 
   const single = async () => {
     setBusy(true)
@@ -70,6 +89,13 @@ export default function Header() {
         <button className="btn ghost" onClick={reset} title="Começar do zero">
           Novo
         </button>
+        <button className="btn ghost" onClick={onSave} title="Salvar projeto como .atp">
+          💾 Salvar
+        </button>
+        <button className="btn ghost" onClick={() => fileRef.current.click()} title="Abrir um .atp">
+          📂 Abrir
+        </button>
+        <input ref={fileRef} type="file" accept=".atp,application/json" hidden onChange={onOpen} />
         <button className="btn" onClick={single} disabled={busy}>
           ⬇ Baixar slide
         </button>

@@ -299,6 +299,31 @@ export const useStore = create((set, get) => {
         }
         return addElToCurrent(s, el)
       }),
+    // emoji = elemento de texto colorido (renderizado pela fonte de emoji do sistema)
+    addEmoji: (char) =>
+      update((s) => {
+        const { w, h } = getStageSize(s.format)
+        const size = Math.round(h * 0.1)
+        const el = {
+          id: nanoid(),
+          type: 'text',
+          emoji: true,
+          x: w * 0.4,
+          y: h * 0.4,
+          width: Math.round(size * 1.4),
+          text: char,
+          fontFamily: 'Inter',
+          fontSize: size,
+          fontStyle: 'normal',
+          fill: '#FFFFFF',
+          align: 'center',
+          lineHeight: 1,
+          letterSpacing: 0,
+          rotation: 0,
+          opacity: 1,
+        }
+        return addElToCurrent(s, el)
+      }),
     addImage: (src, naturalW, naturalH) =>
       update((s) => {
         const { w } = getStageSize(s.format)
@@ -475,6 +500,15 @@ export const useStore = create((set, get) => {
         selectedId: null,
         identity: identity || null,
         ...(format ? { format } : {}),
+      })),
+
+    // carrega um projeto vindo de um arquivo .atp
+    loadProject: (p) =>
+      update(() => ({
+        format: (p.format && FORMATS[p.format.key]) || p.format || FORMATS.feed,
+        slides: Array.isArray(p.slides) && p.slides.length ? p.slides : [blankSlide()],
+        currentIndex: 0,
+        selectedId: null,
       })),
 
     reset: () =>

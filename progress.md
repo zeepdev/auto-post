@@ -74,3 +74,10 @@
 - `lib/recolor.js` (`recolorSlides`): remapeia as cores usadas (backgrounds + fills) pela paleta escolhida, ordenando ambas por luminância (escura→escura, clara→clara) pra preservar contraste/estrutura. Imagens não têm fill (ignoradas).
 - Store `applyPaletteToAll(palette?)`: usa as `brandColors` (ou paleta passada) pra repintar todos os slides + recalcula `identity`. Passa por `update` → desfazível (Ctrl+Z).
 - Botão "🎨 Definir paleta em todas as artes" na seção Identidade da marca (desabilita sem cores). Build OK (249 módulos).
+
+### 2026-05-29 (cont. 7) — Emojis, mais ícones, IA sempre com elementos, arquivo .atp
+- **Emojis como elementos** (`lib/emojis.js`, 32 emojis incl. ✅): `addEmoji` cria um elemento de texto colorido (renderizado pela fonte de emoji do sistema; sem lib pesada). Picker na seção Elementos.
+- **Biblioteca de ícones ampliada** (`icons.js`): +10 (casa, telefone, balao, grafico, lampada, play, coroa, aspas, foguete, selo) → 23 ícones. `ICON_NAMES` no `anthropic.js` sincronizado.
+- **IA sempre enriquece**: prompt do `anthropic.js` agora exige decorations em todo slide (1 grande esmaecida de fundo + 1–3 detalhes nos cantos), combinando com a identity.
+- **Arquivo .atp** (`lib/projectFile.js`): `saveProject` baixa JSON `{app,version,format,slides}` como `nome.atp`; `readProjectFile` valida e abre. Store `loadProject`. Botões 💾 Salvar / 📂 Abrir no Header. Resposta sobre bancos de ícones da web: MDI/@mdi/js, Lucide, Bootstrap Icons (anotado p/ futura integração se quiser milhares).
+- Build OK (251 módulos).

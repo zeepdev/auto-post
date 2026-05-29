@@ -8,6 +8,8 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6'
 const ICON_NAMES = [
   'estrela', 'coracao', 'raio', 'seta', 'escudo', 'diamante',
   'mais', 'check', 'brilho', 'pino', 'fogo', 'pilar', 'engrenagem',
+  'casa', 'telefone', 'balao', 'grafico', 'lampada', 'play',
+  'coroa', 'aspas', 'foguete', 'selo',
 ]
 
 const POST_TOOL = {
@@ -85,8 +87,8 @@ export async function generateSpec({ contextText, images = [], mode, pages, pale
     'Você é um diretor de arte e copywriter sênior de social media, especialista em Instagram.',
     'Escreva sempre em português do Brasil, com linguagem clara, persuasiva e adequada ao público.',
     'Títulos curtos e impactantes; textos escaneáveis; nada de clichê vazio.',
-    'Quando fizer sentido, use "decorations" (formas geométricas ou ícones da lista) de forma sutil pra enriquecer a arte, sem poluir nem cobrir o texto. Posicione nos cantos ou bordas.',
-    'Você pode usar UMA decoração grande e bem esmaecida (size 0.6–0.9, opacity ~0.1, ex: pilar/engrenagem/diamante) como elemento de fundo pra dar profundidade, além de pequenos detalhes nos cantos.',
+    'SEMPRE enriqueça a arte com "decorations" (formas geométricas ou ícones da lista). Em todo slide use: (1) UMA decoração grande e bem esmaecida (size 0.6–0.9, opacity 0.08–0.15, ex: pilar/engrenagem/diamante/escudo) como elemento de fundo pra dar profundidade, e (2) de 1 a 3 detalhes pequenos nos cantos/bordas (ex: aspas, brilho, raio, pontos). Nunca cubra o texto — decorações ficam atrás dele.',
+    'Combine as cores das decorações com a identity (accent e variações), variando opacidade pra dar camadas.',
     'Use a ferramenta create_post para devolver o conteúdo estruturado.',
     palette.length
       ? `Paleta de marca sugerida (use em identity, com cores legíveis): ${palette.join(', ')}.`
